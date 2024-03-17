@@ -46,17 +46,15 @@ namespace QRCodeGenerator.API.Concretes
                 basicProperties: properties,
                 body: requestMessage);
 
-            // Setup a task completion source to await the response
             TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
 
-            // Listen for the response
             EventingBasicConsumer consumer = new(channel);
             consumer.Received += (sender, e) =>
             {
                 if (e.BasicProperties.CorrelationId == correlationId)
                 {
                     responseQrCodeBytes = e.Body.ToArray();
-                    tcs.SetResult(responseQrCodeBytes); // Set the result when the response is received
+                    tcs.SetResult(responseQrCodeBytes); 
                 }
             };
 
@@ -65,7 +63,6 @@ namespace QRCodeGenerator.API.Concretes
                 autoAck: true,
                 consumer: consumer);
 
-            // Wait for the response
             await Task.Run(() => tcs.Task);
 
             return responseQrCodeBytes;
